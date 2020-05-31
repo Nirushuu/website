@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cloth simulation with Position Based Dynamics</title>
+    <script src="processing.js"></script>
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,300" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <h1>Cloth simulation with Position Based Dynamics</h1>
+    <p>This is a school project in a graphics programming course I took back in 2017. It was originally programmed in Java using the Processing library. In 2020 I made a quick port to Processing.js so that it could run in the browser. It does run slower than the Java version but I think it suffices for getting a feel for the project.</p>
+
+    <p>I had previously heard of the idea to simulate cloth by treating the fabric as if composed of particles interconnected by springs. Superficially it sounds fine but if you observe cloth, springy is not the characteristic that comes to mind, rather it flows. I began thinking about this and looking for alternative approaches and found an article by Müller and coworkers[0] which had a much nicer more appealing approach. Their idea was to impose constraints on the simulated cloth, e.g. distance contraints on the particles within the cloth, thus yielding a fabric which is free to move and flow. Underneath this text you will find my implementation of cloth using their simulation algorithm. Try changing the parameters to see how it reacts (e.g. the solver seems to be stable with 2 or more iterations).</p>
+    
+    <canvas data-processing-sources="cloth.pde"></canvas>
+</body>
+</html>
