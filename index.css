@@ -1,0 +1,10 @@
+body {
+    margin: 15%;
+    background-color: #fafafa;
+    font-family: "Open Sans";
+}
+
+p {
+    font-size: 125%;
+    font-weight: 300;
+}
