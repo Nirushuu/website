@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>11B. Jumping Jack</title>
+    <script src="processing.js"></script>
+    <link rel="stylesheet" type="text/css" href="../index.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,300" rel="stylesheet" type="text/css">
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+</head>
+<body>
+    <h1>11B. Jumping Jack</h1>
+    <p><a href = "https://codeforces.com/problemset/problem/11/B">Check out the problem description here.</a></p>
+
+    <h2>Tutorial</h2>
+    <p>First we notice that we are looking at the arithmetic sum of the whole numbers 1, 2, 3, ... and we may choose to add or subtract any of these to sum to the target. We may also begin by assuming that the sought target is positive. Since we are only interested in the number of jumps, we can think of it as how many numbers do we need until we may combine them to reach the target. Naturally, we need to have enough numbers such that adding them all equals at least the sought target.</p>
+    
+    <p>Assume that we keep adding the numbers together and reach the target. Then we are done. Otherwise, we have overshot our target. In this case at least one of the numbers in the sum must be taken as negative. Notice though, that changing one number in the sum from positive to negative reduces the sum by twice that amount. That is to say, that unless we overshoot the sought target by an even amount, we need more numbers.</p>
+    
+    <p>Now that we have enough numbers such that the sum overshoots by an even amount, can we be sure that some combination of numbers, taken as negative, leaves us exactly at the target. Yes. And we can answer it this way. We are seeking a subset of the numbers such that their sum equals half the overshoot. Any number up to the total sum may be formed by a subset. And since half the overshoot is necessarily smaller than the total sum it must be true.</p>
+    
+    <p>We have left out a few details. If the target is zero, the steps are trivially zero. If the target is negative we may do exactly the same process but with the negative integers. Thus we may as well calculate the number of jumps of the absolute value.</p>
+    
+    <h2>Code</h2>
+    <pre class="prettyprint">
+    #include &lt;bits/stdc++.h&gt;
+    using namespace std;
+        
+    int main() {
+    
+        long x;
+        cin >> x;
+
+        x = abs(x);
+
+        long ans = 0, sum = 0;
+        while (sum < x || (sum - x) % 2 == 1) {
+            ++ans;
+            sum += ans;
+        }
+
+        cout << ans;
+    }       
+    </pre>
+</body>
+</html>
