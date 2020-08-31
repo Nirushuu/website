@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Classifier in Tensorflow</title>
+    <link rel="stylesheet" type="text/css" href="../index.css">
+    <!--    load the nice open sans font-->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,300" rel="stylesheet" type="text/css">
+    <meta charset="UTF-8">
+    <!--    load tensorflow js-->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script> 
+</head>
+<body>
+    <h1>Image Classification</h1>
+    
+    <section>
+    <p>This image classifier has been trained to recognize objects (not people). It uses the EfficientNet architecture to allow inference in the browser. It was trained from scratch on the ImageNet dataset for 4000 GPU hours on 4 RTX 2080 Ti graphics cards to reach 95% top-5 error. Try uploading an image and see what it says.</p>
+    </section>
+
+    <section>
+        <input type="file" id="file" accept="image/*" onchange="onFileSelected(event)" />
+<!--        <button id="predict">Predict</button>-->
+    </section>
+    
+    <img id="img" src="cat.jpg" width=224 height=224 />
+<!--    some pre-computed answers-->
+    <div id="predictions">
+        <div>Egyptian cat</div>    
+        <div>56.6%</div>
+        <div>Siamese cat, Siamese</div>
+        <div>25.9%</div>
+        <div>Persian cat</div>
+        <div>6.2%</div>
+        <div>tabby, tabby cat</div>
+        <div>3.6%</div>
+        <div>Siberian husky</div>
+        <div>1.1%</div>
+        <div>lynx, catamount</div>
+        <div>0.8%</div>
+        <div>tiger cat</div>
+        <div>0.8%</div>
+        <div>Eskimo dog, husky</div>
+        <div>0.7%</div>
+        <div>red fox, Vulpes vulpes</div>
+        <div>0.4%</div>
+        <div>Angora, Angora rabbit</div>
+        <div>0.3%</div>
+    </div>
+    
+    <script>
+        // pretrained model demo based on https://github.com/tensorflow/tfjs-examples/tree/master/mobilenet
+        const IMAGE_SIZE = 224;
+        const MODEL_URL = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
+        
+        let model;
+        let CLASS_NAMES;
+        const demo = async function() {
+            model = await tf.loadLayersModel(MODEL_URL);
+            let img = document.getElementById("img");
+            let importedModule = await import("./imagenet_classes.js");
+            CLASS_NAMES = importedModule.IMAGENET_CLASSES;
+            predict(img);
+        };
+        
+        
+        function predict(imgElement) {
+
+            // get tensor from imgElement
+            const img = tf.browser.fromPixels(imgElement).toFloat();
+
+            // normalize image from [0, 255] to [-1, 1].
+            const offset = tf.scalar(127.5);
+            const normalized = img.sub(offset).div(offset);
+
+            // predict takes batches so batch the single element
+            const batched = normalized.reshape([1, IMAGE_SIZE, IMAGE_SIZE, 3]);
+            
+            let logits = model.predict(batched);
+            
+            let classesAndPreds = getTop10Preds(logits);
+//            console.log(classesAndPreds);
+            show(classesAndPreds);
+        }
+        
+        
+        
+//        
+//        document.getElementById("predict").onclick = function() {
+//
+//            let imgElement = document.getElementById("img");
+//            predict(imgElement);
+//            
+//        };
+//        
+
+        // image loading based on https://stackoverflow.com/questions/3814231/loading-an-image-to-a-img-from-input-file
+        function onFileSelected(event) {
+            var selectedFile = event.target.files[0];
+            var reader = new FileReader();
+            var imgElement = document.getElementById("img");
+
+            reader.onload = function(event) {
+                imgElement.src = event.target.result;
+            };
+
+            reader.readAsDataURL(selectedFile);
+            imgElement.onload = () => predict(imgElement);
+        }
+      
+        
+        // gets the top 10 predictions from softmax logits
+        function getTop10Preds(logits) {
+            
+            // get softmax probs synchronously
+            let values = logits.dataSync();
+            // pair values with indices and sort them
+            let valuesAndIndices = [];
+            for (let i = 0; i < values.length; ++i) {
+                valuesAndIndices.push({value: values[i], index: i});
+            }
+            valuesAndIndices.sort((x, y) => {return y.value - x.value;});
+            
+            // get top 10 classes with probabilities
+            let classesAndProbs = [];
+            for (let i = 0; i < 10; ++i) {
+                classesAndProbs.push({
+                    class: CLASS_NAMES[valuesAndIndices[i].index], probability: valuesAndIndices[i].value
+                });
+            }
+            
+            return classesAndProbs;
+        }
+            
+            
+        
+        function show(classesAndProbs) {
+            
+            let predContainer = document.getElementById("predictions");
+            predContainer.innerHTML = "";
+            
+            let predElement = document.createElement("div");
+            for (let i = 0; i < 10; ++i) {
+                let row = document.createElement("div");
+                
+                let classElement = document.createElement("div");
+                classElement.innerText = classesAndProbs[i].class;
+                row.appendChild(classElement);
+                
+                let probElement = document.createElement("div");
+                probElement.innerText = (classesAndProbs[i].probability * 100).toFixed(1) + "%";
+                row.appendChild(probElement);
+                
+                predElement.appendChild(row);
+            }
+            
+            predContainer.appendChild(predElement);
+            
+            
+        }
+ 
+        
+        
+        demo();
+    </script>
+</body>
+</html>
